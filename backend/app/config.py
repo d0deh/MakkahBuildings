@@ -45,21 +45,18 @@ NA_VALUE = "لا ينطبق"
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
     ANTHROPIC_API_KEY: str = ""
-    CORS_ORIGINS: list[str] = [
-        "http://localhost:3000",
-        "http://localhost:3001",
-        "http://127.0.0.1:3000",
-    ]
-    FRONTEND_URL: str = ""  # Set to Vercel URL in production (e.g. https://your-app.vercel.app)
+    # Comma-separated string — works with Railway/Render/Docker plain env vars
+    CORS_ORIGINS: str = "http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000"
+    FRONTEND_URL: str = ""  # Vercel URL in production (e.g. https://your-app.vercel.app)
     UPLOAD_DIR: str = str(UPLOAD_DIR)
 
     model_config = {"env_file": str(BACKEND_ROOT / ".env"), "extra": "ignore"}
 
     @property
     def all_origins(self) -> list[str]:
-        """CORS_ORIGINS + FRONTEND_URL if set."""
-        origins = list(self.CORS_ORIGINS)
-        if self.FRONTEND_URL:
+        """Parse CORS_ORIGINS comma-separated string + FRONTEND_URL into a list."""
+        origins = [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
+        if self.FRONTEND_URL and self.FRONTEND_URL not in origins:
             origins.append(self.FRONTEND_URL)
         return origins
 
