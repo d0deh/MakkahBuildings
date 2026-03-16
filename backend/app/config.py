@@ -45,10 +45,23 @@ NA_VALUE = "لا ينطبق"
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
     ANTHROPIC_API_KEY: str = ""
-    CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://127.0.0.1:3000"]
+    CORS_ORIGINS: list[str] = [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://127.0.0.1:3000",
+    ]
+    FRONTEND_URL: str = ""  # Set to Vercel URL in production (e.g. https://your-app.vercel.app)
     UPLOAD_DIR: str = str(UPLOAD_DIR)
 
     model_config = {"env_file": str(BACKEND_ROOT / ".env"), "extra": "ignore"}
+
+    @property
+    def all_origins(self) -> list[str]:
+        """CORS_ORIGINS + FRONTEND_URL if set."""
+        origins = list(self.CORS_ORIGINS)
+        if self.FRONTEND_URL:
+            origins.append(self.FRONTEND_URL)
+        return origins
 
 
 settings = Settings()

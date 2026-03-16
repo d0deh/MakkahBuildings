@@ -26,7 +26,11 @@ Thumbs.db
 # Frontend
 frontend/node_modules/
 frontend/.next/
+frontend/.env
+frontend/.env.local
 
 # Backend
 backend/**/__pycache__/
 backend/=1.0.0
+backend/.env
+backend/uploads/

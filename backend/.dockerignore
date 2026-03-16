@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.env
+.ai_cache/
+uploads/
+.venv/
+venv/
+=1.0.0
