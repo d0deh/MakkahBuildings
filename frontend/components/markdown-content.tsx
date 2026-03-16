@@ -69,6 +69,31 @@ const components: Components = {
       </div>
     );
   },
+  // Tables
+  table: ({ children }) => (
+    <div className="overflow-x-auto my-3">
+      <table className="w-full text-sm border border-[hsl(var(--border))] rounded-lg overflow-hidden">
+        {children}
+      </table>
+    </div>
+  ),
+  thead: ({ children }) => <thead>{children}</thead>,
+  tbody: ({ children }) => <tbody>{children}</tbody>,
+  tr: ({ children }) => (
+    <tr className="border-b border-[hsl(var(--border))] last:border-0">
+      {children}
+    </tr>
+  ),
+  th: ({ children }) => (
+    <th className="bg-[hsl(var(--surface))] text-gold font-bold px-3 py-2 text-right">
+      {children}
+    </th>
+  ),
+  td: ({ children }) => (
+    <td className="border-t border-[hsl(var(--border))] px-3 py-2 text-right text-foreground/80">
+      {children}
+    </td>
+  ),
   // Custom text renderer to highlight numbers
   text: ({ children }) => {
     if (typeof children === "string") {

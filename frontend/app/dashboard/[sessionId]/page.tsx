@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { MessageSquare, Download } from "lucide-react";
+import { Download } from "lucide-react";
 import { StatsCards } from "@/components/stats-cards";
 import { ChartSection } from "@/components/chart-section";
 import { AiNarrativeSection } from "@/components/ai-narrative-section";
 import { DashboardSkeleton, ProgressBanner, ChartSkeleton } from "@/components/loading-state";
-import { ChatPanel } from "@/components/chat/chat-panel";
+import { ChatBar } from "@/components/chat/chat-bar";
 import { ExportModal } from "@/components/export/export-modal";
 import { MarkdownContent } from "@/components/markdown-content";
 import { Badge } from "@/components/ui/badge";
@@ -50,7 +50,7 @@ export default function DashboardPage() {
   const [validationWarnings, setValidationWarnings] = useState<string[]>([]);
   const [allDone, setAllDone] = useState(false);
 
-  const { chatOpen, toggleChat, pinnedItems } = useDashboardStore();
+  const { pinnedItems } = useDashboardStore();
 
   useEffect(() => {
     // Load stats first (fast), then charts + AI in parallel
@@ -213,15 +213,6 @@ export default function DashboardPage() {
             <Button
               size="sm"
               variant="ghost"
-              onClick={toggleChat}
-              className={`text-muted-foreground hover:text-foreground ${chatOpen ? "text-gold" : ""}`}
-              title="محادثة مع البيانات"
-            >
-              <MessageSquare className="h-4 w-4" />
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
               onClick={() => setExportOpen(true)}
               className="text-muted-foreground hover:text-foreground"
               title="تصدير PPTX"
@@ -240,15 +231,8 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      {/* Chat Sidebar */}
-      <ChatPanel sessionId={sessionId} />
-
       {/* Dashboard Content */}
-      <main
-        className={`max-w-7xl mx-auto p-6 space-y-10 transition-all duration-300 ${
-          chatOpen ? "mr-[400px] max-md:mr-0" : ""
-        }`}
-      >
+      <main className="max-w-7xl mx-auto p-6 space-y-10 pb-24">
         {/* Section 1: Hero Stats */}
         <section>
           <StatsCards stats={stats} />
@@ -395,8 +379,11 @@ export default function DashboardPage() {
         onClose={() => setExportOpen(false)}
       />
 
+      {/* Chat Bar — fixed bottom */}
+      <ChatBar sessionId={sessionId} />
+
       {/* Footer */}
-      <footer className="border-t border-[hsl(var(--border))] text-muted-foreground text-center py-4 text-sm mt-12">
+      <footer className="border-t border-[hsl(var(--border))] text-muted-foreground text-center py-4 text-sm mb-16">
         مولد التقارير العمرانية v0.4
       </footer>
     </div>

@@ -29,7 +29,7 @@ async def chat(session_id: str, req: ChatRequest):
 
     try:
         reply = await asyncio.to_thread(
-            chat_with_data, session.stats, req.message, req.history
+            chat_with_data, session.stats, req.message, req.history, session.records
         )
         message_id = uuid.uuid4().hex[:8]
 

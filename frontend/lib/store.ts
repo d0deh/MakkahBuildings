@@ -3,8 +3,8 @@ import type { ChatMessage, PinnedItem } from "./types";
 
 interface DashboardStore {
   // Chat
-  chatOpen: boolean;
-  toggleChat: () => void;
+  conversationOpen: boolean;
+  setConversationOpen: (open: boolean) => void;
   chatMessages: ChatMessage[];
   addMessage: (msg: ChatMessage) => void;
   chatLoading: boolean;
@@ -28,8 +28,8 @@ interface DashboardStore {
 
 export const useDashboardStore = create<DashboardStore>((set) => ({
   // Chat
-  chatOpen: false,
-  toggleChat: () => set((s) => ({ chatOpen: !s.chatOpen })),
+  conversationOpen: false,
+  setConversationOpen: (open) => set({ conversationOpen: open }),
   chatMessages: [],
   addMessage: (msg) =>
     set((s) => ({ chatMessages: [...s.chatMessages, msg] })),
