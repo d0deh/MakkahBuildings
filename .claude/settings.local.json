@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip install:*)",
+      "Bash(python:*)",
+      "Bash(PYTHONUTF8=1 python -m src \"C:/Users/Admin/Downloads/الزهراء والتيسير عمراني2.xlsx\" --no-ai 2>&1)",
+      "Bash(PYTHONUTF8=1 python -c \"\nimport sys\nsys.stdout.reconfigure\\(encoding='utf-8', errors='replace'\\)\nsys.stderr.reconfigure\\(encoding='utf-8', errors='replace'\\)\nfrom dotenv import load_dotenv\nload_dotenv\\(\\)\nfrom src.pipeline import generate_report\ntry:\n    result = generate_report\\('C:/Users/Admin/Downloads/الزهراء والتيسير عمراني2.xlsx', use_ai=False\\)\n    print\\('SUCCESS:', result\\)\nexcept Exception as e:\n    import traceback\n    traceback.print_exc\\(\\)\n\" 2>&1)",
+      "Bash(PYTHONUTF8=1 python -c \"\nimport sys, os\nsys.stdout.reconfigure\\(encoding='utf-8', errors='replace'\\)\nsys.stderr.reconfigure\\(encoding='utf-8', errors='replace'\\)\nfrom src.data.loader import load_excel\nrecords, warnings = load_excel\\('C:/Users/Admin/Downloads/الزهراء والتيسير عمراني2.xlsx'\\)\nprint\\(f'Loaded {len\\(records\\)} records'\\)\nfrom src.data.aggregator import aggregate\nstats = aggregate\\(records\\)\nprint\\(f'Area: {stats.area_name}'\\)\nprint\\('Data loading OK'\\)\n\" 2>&1)",
+      "Bash(PYTHONUTF8=1 python -c \"\nimport sys, os\nsys.stdout.reconfigure\\(encoding='utf-8', errors='replace'\\)\nsys.stderr.reconfigure\\(encoding='utf-8', errors='replace'\\)\nfrom src.data.loader import load_excel\nfrom src.data.aggregator import aggregate\nrecords, _ = load_excel\\('C:/Users/Admin/Downloads/الزهراء والتيسير عمراني2.xlsx'\\)\nstats = aggregate\\(records\\)\nprint\\('Testing charts...'\\)\nfrom src.charts.bar_charts import chart_building_presence\nchart_building_presence\\(stats\\)\nprint\\('chart_building_presence OK'\\)\nfrom src.charts.pie_charts import chart_occupancy\nchart_occupancy\\(stats\\)\nprint\\('chart_occupancy OK'\\)\nprint\\('Charts OK'\\)\n\" 2>&1)",
+      "Bash(cd:*)",
+      "Bash(netstat:*)",
+      "Bash(taskkill:*)",
+      "Bash(sleep:*)",
+      "Bash(curl:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(for f:*)",
+      "Bash(tasklist:*)"
+    ]
+  }
+}

@@ -1,0 +1,32 @@
+# Environment
+.env
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# API keys
+ANTHROPIC_API_KEY
+
+# Output
+output/
+*.pptx
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data cache
+.ai_cache/
+
+# Frontend
+frontend/node_modules/
+frontend/.next/
+
+# Backend
+backend/**/__pycache__/
+backend/=1.0.0
