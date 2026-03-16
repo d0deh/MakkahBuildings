@@ -31,6 +31,11 @@ sample_data/  → Test Excel files
 - Gold: `#C9A84C` (accent)
 - Good: `#2E7D32`, Warning: `#F9A825`, Danger: `#C62828`
 
+## Versioning
+- App version is stored in `frontend/app/dashboard/[sessionId]/page.tsx` as `APP_VERSION`
+- **Before every push to GitHub**, increment the patch version (e.g. 1.3 → 1.4 → 1.5)
+- The version displays in the dashboard footer: `مولد التقارير العمرانية v{APP_VERSION}`
+
 ## Key Rules
 - Every Arabic string in matplotlib MUST pass through `ar()` function
 - `matplotlib.use('Agg')` before any imports

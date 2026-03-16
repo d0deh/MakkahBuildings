@@ -16,6 +16,8 @@ import { getStats, getCharts, getAiSection, getValidation } from "@/lib/api";
 import { useDashboardStore } from "@/lib/store";
 import type { AreaStats, ChartData, AiContent } from "@/lib/types";
 
+const APP_VERSION = "1.3";
+
 const CHART_AI_MAP: Record<string, string> = {
   presence: "desc_presence",
   building_type: "desc_building_type",
@@ -384,7 +386,7 @@ export default function DashboardPage() {
 
       {/* Footer */}
       <footer className="border-t border-[hsl(var(--border))] text-muted-foreground text-center py-4 text-sm mb-16">
-        مولد التقارير العمرانية v0.4
+        مولد التقارير العمرانية v{APP_VERSION}
       </footer>
     </div>
   );
