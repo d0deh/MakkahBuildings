@@ -32,6 +32,7 @@ CHART_ORDER = [
     "road_width",
     "lighting",
     "parking",
+    "compliance",
 ]
 
 # Map section names to slide titles
@@ -91,14 +92,14 @@ def generate_pptx(
         if sections is not None and chart_name not in sections:
             continue
 
-        # Get chart image
-        chart_b64 = session.charts.get(chart_name)
-        if not chart_b64:
-            try:
-                with _mpl_lock:
-                    chart_b64 = generate_chart(chart_name, stats, session.records)
-                session.charts[chart_name] = chart_b64
-            except Exception:
+        # Generate chart at 300 DPI for export (bypass session cache)
+        try:
+            with _mpl_lock:
+                chart_b64 = generate_chart(chart_name, stats, session.records, dpi=300)
+        except Exception:
+            # Fallback to cached version
+            chart_b64 = session.charts.get(chart_name)
+            if not chart_b64:
                 continue
 
         chart_buf = _base64_to_bytesio(chart_b64)
@@ -115,7 +116,11 @@ def generate_pptx(
 
     # 4. Map slide
     if sections is None or "map" in sections:
-        map_b64 = session.charts.get("map")
+        try:
+            with _mpl_lock:
+                map_b64 = generate_chart("map", stats, session.records, dpi=300)
+        except Exception:
+            map_b64 = session.charts.get("map")
         if map_b64:
             map_buf = _base64_to_bytesio(map_b64)
             build_map_slide(prs, map_buf)

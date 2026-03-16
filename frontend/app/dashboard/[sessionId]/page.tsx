@@ -12,7 +12,7 @@ import { ExportModal } from "@/components/export/export-modal";
 import { MarkdownContent } from "@/components/markdown-content";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { getStats, getCharts, getAiSection } from "@/lib/api";
+import { getStats, getCharts, getAiSection, getValidation } from "@/lib/api";
 import { useDashboardStore } from "@/lib/store";
 import type { AreaStats, ChartData, AiContent } from "@/lib/types";
 
@@ -29,6 +29,7 @@ const CHART_AI_MAP: Record<string, string> = {
   road_width: "desc_road_width",
   lighting: "desc_lighting",
   parking: "desc_parking",
+  compliance: "desc_compliance",
   map: "analysis",
 };
 
@@ -46,6 +47,8 @@ export default function DashboardPage() {
   const [aiLoading, setAiLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [exportOpen, setExportOpen] = useState(false);
+  const [validationWarnings, setValidationWarnings] = useState<string[]>([]);
+  const [allDone, setAllDone] = useState(false);
 
   const { chatOpen, toggleChat, pinnedItems } = useDashboardStore();
 
@@ -56,6 +59,11 @@ export default function DashboardPage() {
         const statsData = await getStats(sessionId);
         setStats(statsData);
         setLoading(false);
+
+        // Fetch validation warnings
+        getValidation(sessionId)
+          .then((v) => setValidationWarnings(v.warnings || []))
+          .catch(() => {});
 
         // Fire charts and AI loading in parallel
         getCharts(sessionId)
@@ -122,6 +130,16 @@ export default function DashboardPage() {
     loadCore();
   }, [sessionId]);
 
+  // Show "جاهز" banner briefly when loading completes
+  useEffect(() => {
+    const done = !chartsLoading && !aiLoading && stats !== null;
+    if (done) {
+      setAllDone(true);
+      const timer = setTimeout(() => setAllDone(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [chartsLoading, aiLoading, stats]);
+
   if (loading) return <DashboardSkeleton />;
   if (error) {
     return (
@@ -138,10 +156,11 @@ export default function DashboardPage() {
 
   if (!stats) return null;
 
-  // Progress steps for the banner
+  // Progress steps for the banner (5-step)
   const isLoading = chartsLoading || aiLoading;
   const progressSteps = [
-    { id: "stats", label: "الإحصائيات", status: "done" as const },
+    { id: "data", label: "قراءة البيانات", status: "done" as const },
+    { id: "validation", label: "التحقق", status: "done" as const },
     {
       id: "charts",
       label: "الرسوم البيانية",
@@ -153,8 +172,13 @@ export default function DashboardPage() {
       status: aiLoading
         ? ("active" as const)
         : chartsLoading
-        ? ("pending" as const)
-        : ("done" as const),
+          ? ("pending" as const)
+          : ("done" as const),
+    },
+    {
+      id: "ready",
+      label: "جاهز",
+      status: isLoading ? ("pending" as const) : ("done" as const),
     },
   ];
 
@@ -230,8 +254,33 @@ export default function DashboardPage() {
           <StatsCards stats={stats} />
         </section>
 
+        {/* Validation Warnings */}
+        {validationWarnings.length > 0 && (
+          <div className="bg-[hsl(var(--surface))] border border-status-warning/30 rounded-lg p-4">
+            <p className="text-sm font-bold text-status-warning mb-2">تنبيهات التحقق</p>
+            <ul className="space-y-1">
+              {validationWarnings.map((w, i) => (
+                <li key={i} className="text-xs text-muted-foreground flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-status-warning shrink-0" />
+                  {w}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {/* Progress Banner */}
         {isLoading && <ProgressBanner steps={progressSteps} />}
+        {allDone && !isLoading && (
+          <div className="bg-[hsl(var(--surface))] border border-status-good/30 rounded-lg p-4 flex items-center gap-3">
+            <div className="w-5 h-5 rounded-full bg-status-good flex items-center justify-center shrink-0">
+              <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <p className="text-sm font-bold text-status-good">جاهز</p>
+          </div>
+        )}
 
         {/* Section 2: Executive Summary (AI) */}
         <AiNarrativeSection

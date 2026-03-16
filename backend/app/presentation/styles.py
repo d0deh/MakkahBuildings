@@ -16,6 +16,7 @@ CLR_DARK_GRAY = RGBColor(0x33, 0x33, 0x33)
 
 # Font name for PPTX
 PPTX_FONT = "Cairo"
+PPTX_FONT_CS = "Sakkal Majalla"
 
 # Common positions
 TITLE_LEFT = Inches(0.5)

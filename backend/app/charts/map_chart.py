@@ -13,13 +13,13 @@ from ..config import NAVY, GOLD, COLOR_GOOD, COLOR_BAD, COLOR_MODERATE, COLOR_NE
 from ..core.models import SurveyRecord
 
 
-def chart_map(records: list[SurveyRecord], title: str = "خريطة مواقع المسح") -> BytesIO:
+def chart_map(records: list[SurveyRecord], title: str = "خريطة مواقع المسح", dpi: int = 200) -> BytesIO:
     """Generate a GPS scatter map colored by building presence.
 
     Tries contextily for OSM basemap, falls back to plain scatter.
     """
     setup_arabic_font()
-    apply_theme()
+    apply_theme(dpi=dpi)
 
     # Separate records by building presence
     # Note: In the Excel, col F (الطول) has lat values and col G (العرض) has lng values

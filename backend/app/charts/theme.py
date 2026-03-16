@@ -17,7 +17,7 @@ TEXT_MUTED = '#7D8590'
 GRID_COLOR = '#21262D'
 
 
-def apply_theme():
+def apply_theme(dpi: int = 200):
     """Apply dark chart theme to matplotlib."""
     plt.rcParams.update({
         'figure.facecolor': BG_COLOR,
@@ -33,8 +33,8 @@ def apply_theme():
         'ytick.labelsize': 10,
         'grid.color': GRID_COLOR,
         'grid.linewidth': 0.3,
-        'figure.dpi': 200,
-        'savefig.dpi': 200,
+        'figure.dpi': dpi,
+        'savefig.dpi': dpi,
         'savefig.bbox': 'tight',
         'savefig.pad_inches': 0.2,
     })

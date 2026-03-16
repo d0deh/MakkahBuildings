@@ -22,10 +22,11 @@ def _bar_chart(
     horizontal: bool = False,
     figsize: tuple = (10, 6),
     value_labels: bool = True,
+    dpi: int = 200,
 ) -> BytesIO:
     """Generic bar chart builder. Returns PNG as BytesIO."""
     setup_arabic_font()
-    apply_theme()
+    apply_theme(dpi=dpi)
 
     fig, ax = plt.subplots(figsize=figsize)
 
@@ -75,7 +76,7 @@ def _bar_chart(
     return buf
 
 
-def chart_building_presence(stats: AreaStatistics) -> BytesIO:
+def chart_building_presence(stats: AreaStatistics, dpi: int = 200) -> BytesIO:
     """Bar chart: buildings vs empty plots."""
     data = {}
     if stats.total_with_buildings > 0:
@@ -88,29 +89,30 @@ def chart_building_presence(stats: AreaStatistics) -> BytesIO:
     return _bar_chart(
         data, "وجود المباني في العناوين الوطنية",
         colors=[GOLD, "#3B82AA", "#78909C"][:len(data)],
+        dpi=dpi,
     )
 
 
-def chart_building_type(stats: AreaStatistics) -> BytesIO:
+def chart_building_type(stats: AreaStatistics, dpi: int = 200) -> BytesIO:
     """Horizontal bar: building types."""
     data = dict(sorted(stats.building_types.items(), key=lambda x: -x[1]))
-    return _bar_chart(data, "أنواع المباني", horizontal=True, figsize=(10, max(5, len(data) * 1.2)))
+    return _bar_chart(data, "أنواع المباني", horizontal=True, figsize=(10, max(5, len(data) * 1.2)), dpi=dpi)
 
 
-def chart_building_condition(stats: AreaStatistics) -> BytesIO:
+def chart_building_condition(stats: AreaStatistics, dpi: int = 200) -> BytesIO:
     """Bar chart: building conditions with semantic colors."""
     data = dict(sorted(stats.building_conditions.items(), key=lambda x: -x[1]))
     colors = [get_condition_color(k) for k in data.keys()]
-    return _bar_chart(data, "حالة المباني", colors=colors)
+    return _bar_chart(data, "حالة المباني", colors=colors, dpi=dpi)
 
 
-def chart_construction_method(stats: AreaStatistics) -> BytesIO:
+def chart_construction_method(stats: AreaStatistics, dpi: int = 200) -> BytesIO:
     """Bar chart: construction methods."""
     data = dict(sorted(stats.construction_methods.items(), key=lambda x: -x[1]))
-    return _bar_chart(data, "أساليب الإنشاء")
+    return _bar_chart(data, "أساليب الإنشاء", dpi=dpi)
 
 
-def chart_exterior_finish(stats: AreaStatistics) -> BytesIO:
+def chart_exterior_finish(stats: AreaStatistics, dpi: int = 200) -> BytesIO:
     """Bar chart: exterior finish quality with semantic colors."""
     order = ["ممتاز", "جيد جدًا", "جيد", "سيء"]
     data = {}
@@ -122,30 +124,30 @@ def chart_exterior_finish(stats: AreaStatistics) -> BytesIO:
             data[k] = v
 
     colors = [get_finish_color(k) for k in data.keys()]
-    return _bar_chart(data, "حالة التشطيب الخارجي", colors=colors)
+    return _bar_chart(data, "حالة التشطيب الخارجي", colors=colors, dpi=dpi)
 
 
-def chart_floor_distribution(stats: AreaStatistics) -> BytesIO:
+def chart_floor_distribution(stats: AreaStatistics, dpi: int = 200) -> BytesIO:
     """Bar chart: number of floors."""
     data = dict(sorted(stats.floor_distribution.items(), key=lambda x: int(x[0])))
     labeled = {f"{k} طابق": v for k, v in data.items()}
-    return _bar_chart(labeled, "توزيع عدد الطوابق", xlabel="عدد الطوابق")
+    return _bar_chart(labeled, "توزيع عدد الطوابق", xlabel="عدد الطوابق", dpi=dpi)
 
 
-def chart_building_usage(stats: AreaStatistics) -> BytesIO:
+def chart_building_usage(stats: AreaStatistics, dpi: int = 200) -> BytesIO:
     """Horizontal bar: building usage types."""
     data = dict(sorted(stats.building_usages.items(), key=lambda x: -x[1]))
-    return _bar_chart(data, "استخدامات المباني", horizontal=True, figsize=(10, max(5, len(data) * 1.2)))
+    return _bar_chart(data, "استخدامات المباني", horizontal=True, figsize=(10, max(5, len(data) * 1.2)), dpi=dpi)
 
 
-def chart_road_type(stats: AreaStatistics) -> BytesIO:
+def chart_road_type(stats: AreaStatistics, dpi: int = 200) -> BytesIO:
     """Bar chart: road types."""
     data = dict(sorted(stats.road_types.items(), key=lambda x: -x[1]))
-    return _bar_chart(data, "أنواع الطرق")
+    return _bar_chart(data, "أنواع الطرق", dpi=dpi)
 
 
-def chart_road_width(stats: AreaStatistics) -> BytesIO:
+def chart_road_width(stats: AreaStatistics, dpi: int = 200) -> BytesIO:
     """Bar chart: road width distribution."""
     data = dict(sorted(stats.road_width_distribution.items(), key=lambda x: int(x[0])))
     labeled = {f"{k}م": v for k, v in data.items()}
-    return _bar_chart(labeled, "توزيع عرض الطرق (متر)", xlabel="العرض (م)")
+    return _bar_chart(labeled, "توزيع عرض الطرق (متر)", xlabel="العرض (م)", dpi=dpi)

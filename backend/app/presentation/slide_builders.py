@@ -1,10 +1,13 @@
 """Individual slide type builders for the PPTX report."""
 from __future__ import annotations
+import re
 from io import BytesIO
+from lxml import etree
 from pptx import Presentation
 from pptx.util import Inches, Pt
 from pptx.enum.text import PP_ALIGN
 from pptx.slide import Slide
+from pptx.oxml.ns import qn
 
 from .styles import *
 
@@ -14,6 +17,15 @@ def _set_rtl(paragraph):
     pPr = paragraph._p.get_or_add_pPr()
     pPr.set("rtl", "1")
     pPr.set("algn", "r")
+
+
+def _set_cs_font(run):
+    """Set complex script (Arabic) font on a run for proper Arabic rendering in PPTX."""
+    rPr = run._r.get_or_add_rPr()
+    cs = rPr.find(qn("a:cs"))
+    if cs is None:
+        cs = etree.SubElement(rPr, qn("a:cs"))
+    cs.set("typeface", PPTX_FONT_CS)
 
 
 def _add_text_box(
@@ -41,6 +53,144 @@ def _add_text_box(
     p.font.name = PPTX_FONT
     p.alignment = alignment
     _set_rtl(p)
+    # Set complex script font for Arabic rendering
+    for run in p.runs:
+        _set_cs_font(run)
+
+
+def _parse_bold_runs(text: str) -> list[dict]:
+    """Split text on **bold** markers into run specs.
+
+    Returns a list of dicts: [{"text": "...", "bold": True/False}, ...]
+    """
+    runs = []
+    parts = re.split(r'(\*\*.*?\*\*)', text)
+    for part in parts:
+        if not part:
+            continue
+        if part.startswith('**') and part.endswith('**'):
+            runs.append({"text": part[2:-2], "bold": True})
+        else:
+            runs.append({"text": part, "bold": False})
+    return runs
+
+
+def _parse_markdown_to_paragraphs(text: str) -> list[dict]:
+    """Parse markdown text into structured paragraph specs.
+
+    Returns list of dicts:
+      {"type": "header", "text": "...", "level": 1-3}
+      {"type": "bullet", "text": "...", "runs": [...]}
+      {"type": "text", "text": "...", "runs": [...]}
+    """
+    paragraphs = []
+    for line in text.split('\n'):
+        stripped = line.strip()
+        if not stripped:
+            paragraphs.append({"type": "text", "text": "", "runs": []})
+            continue
+
+        # Headers: ### Header, ## Header, # Header
+        header_match = re.match(r'^(#{1,3})\s+(.+)$', stripped)
+        if header_match:
+            level = len(header_match.group(1))
+            paragraphs.append({
+                "type": "header",
+                "text": header_match.group(2),
+                "level": level,
+                "runs": _parse_bold_runs(header_match.group(2)),
+            })
+            continue
+
+        # Bullets: - item or * item or numbered: 1. item
+        bullet_match = re.match(r'^[-*]\s+(.+)$', stripped)
+        if not bullet_match:
+            bullet_match = re.match(r'^\d+[.)]\s+(.+)$', stripped)
+        if bullet_match:
+            content = bullet_match.group(1)
+            paragraphs.append({
+                "type": "bullet",
+                "text": content,
+                "runs": _parse_bold_runs(content),
+            })
+            continue
+
+        # Regular text with possible bold
+        paragraphs.append({
+            "type": "text",
+            "text": stripped,
+            "runs": _parse_bold_runs(stripped),
+        })
+
+    return paragraphs
+
+
+def _add_rich_text_box(
+    slide: Slide,
+    left,
+    top,
+    width,
+    height,
+    markdown_text: str,
+    base_font_size: int = 14,
+    font_color=CLR_DARK_GRAY,
+) -> None:
+    """Build a formatted text box from markdown text with headers, bullets, bold."""
+    txBox = slide.shapes.add_textbox(left, top, width, height)
+    tf = txBox.text_frame
+    tf.word_wrap = True
+
+    paragraphs = _parse_markdown_to_paragraphs(markdown_text)
+
+    for i, pspec in enumerate(paragraphs):
+        if i == 0:
+            p = tf.paragraphs[0]
+        else:
+            p = tf.add_paragraph()
+
+        _set_rtl(p)
+
+        if pspec["type"] == "header":
+            size_map = {1: base_font_size + 6, 2: base_font_size + 4, 3: base_font_size + 2}
+            font_size = size_map.get(pspec["level"], base_font_size + 2)
+            run = p.add_run()
+            run.text = pspec["text"]
+            run.font.size = Pt(font_size)
+            run.font.bold = True
+            run.font.color.rgb = CLR_NAVY
+            run.font.name = PPTX_FONT
+            _set_cs_font(run)
+            p.space_before = Pt(8)
+
+        elif pspec["type"] == "bullet":
+            # Gold bullet character prefix
+            bullet_run = p.add_run()
+            bullet_run.text = "\u2022 "
+            bullet_run.font.size = Pt(base_font_size)
+            bullet_run.font.color.rgb = CLR_GOLD
+            bullet_run.font.name = PPTX_FONT
+            _set_cs_font(bullet_run)
+
+            for rspec in pspec.get("runs", []):
+                run = p.add_run()
+                run.text = rspec["text"]
+                run.font.size = Pt(base_font_size)
+                run.font.color.rgb = font_color
+                run.font.bold = rspec.get("bold", False)
+                run.font.name = PPTX_FONT
+                _set_cs_font(run)
+            p.space_before = Pt(2)
+
+        else:
+            # Regular text
+            for rspec in pspec.get("runs", []):
+                run = p.add_run()
+                run.text = rspec["text"]
+                run.font.size = Pt(base_font_size)
+                run.font.color.rgb = font_color
+                run.font.bold = rspec.get("bold", False)
+                run.font.name = PPTX_FONT
+                _set_cs_font(run)
 
 
 def build_title_slide(
@@ -187,14 +337,14 @@ def build_summary_slide(
         )
 
     if ai_analysis:
-        _add_text_box(
+        _add_rich_text_box(
             slide,
             Inches(0.8),
             Inches(3.8),
             Inches(11.733),
             Inches(3.2),
             ai_analysis,
-            font_size=13,
+            base_font_size=13,
             font_color=CLR_DARK_GRAY,
         )
 
@@ -243,14 +393,14 @@ def build_chart_slide(
             bold=True,
         )
 
-        _add_text_box(
+        _add_rich_text_box(
             slide,
             DESC_LEFT + Inches(0.3),
             DESC_TOP + Inches(1.0),
             DESC_WIDTH - Inches(0.6),
             DESC_HEIGHT - Inches(1.3),
             description,
-            font_size=12,
+            base_font_size=12,
             font_color=CLR_DARK_GRAY,
         )
     else:
@@ -310,15 +460,15 @@ def build_narrative_slide(prs: Presentation, title: str, text: str) -> Slide:
     line.fill.fore_color.rgb = CLR_GOLD
     line.line.fill.background()
 
-    # Content text
-    _add_text_box(
+    # Content text (with markdown formatting)
+    _add_rich_text_box(
         slide,
         Inches(0.8),
         Inches(1.5),
         Inches(11.733),
         Inches(5.5),
         text,
-        font_size=14,
+        base_font_size=14,
         font_color=CLR_DARK_GRAY,
     )
 

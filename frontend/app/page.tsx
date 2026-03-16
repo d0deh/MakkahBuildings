@@ -45,6 +45,7 @@ export default function HomePage() {
           <p className="text-sm text-muted-foreground">
             تحليل بيانات المسح العمراني وإنشاء التقارير تلقائياً
           </p>
+          <p className="text-xs text-muted-foreground/60">v1.2</p>
         </div>
 
         <UploadZone onFileSelected={setFile} isLoading={isUploading} />

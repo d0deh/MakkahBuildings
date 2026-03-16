@@ -6,9 +6,9 @@
   :root {
     --background: 216 28% 7%;
     --foreground: 210 29% 90%;
-    --card: 215 25% 11%;
+    --card: 215 21% 11%;
     --card-foreground: 210 29% 90%;
-    --popover: 215 25% 11%;
+    --popover: 215 21% 11%;
     --popover-foreground: 210 29% 90%;
     --primary: 42 52% 54%;
     --primary-foreground: 216 28% 7%;
@@ -25,7 +25,7 @@
     --ring: 42 52% 54%;
     --radius: 0.5rem;
 
-    --surface: 215 25% 11%;
+    --surface: 215 21% 11%;
     --surface-hover: 215 18% 16%;
     --border-emphasis: 215 14% 21%;
     --text-muted: 213 10% 47%;

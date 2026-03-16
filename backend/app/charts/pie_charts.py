@@ -19,10 +19,11 @@ def _pie_chart(
     colors: list[str] | None = None,
     donut: bool = False,
     figsize: tuple = (8, 8),
+    dpi: int = 200,
 ) -> BytesIO:
     """Generic pie/donut chart. Returns PNG as BytesIO."""
     setup_arabic_font()
-    apply_theme()
+    apply_theme(dpi=dpi)
 
     fig, ax = plt.subplots(figsize=figsize)
 
@@ -64,7 +65,7 @@ def _pie_chart(
     return buf
 
 
-def chart_occupancy(stats: AreaStatistics) -> BytesIO:
+def chart_occupancy(stats: AreaStatistics, dpi: int = 200) -> BytesIO:
     """Donut chart: residential occupancy (occupied vs vacant)."""
     data = {}
     if stats.total_residential_occupied > 0:
@@ -76,10 +77,10 @@ def chart_occupancy(stats: AreaStatistics) -> BytesIO:
         data["لا توجد بيانات"] = 1
 
     colors = [COLOR_GOOD, COLOR_BAD][:len(data)]
-    return _pie_chart(data, "إشغال الوحدات السكنية", colors=colors, donut=True)
+    return _pie_chart(data, "إشغال الوحدات السكنية", colors=colors, donut=True, dpi=dpi)
 
 
-def chart_lighting(stats: AreaStatistics) -> BytesIO:
+def chart_lighting(stats: AreaStatistics, dpi: int = 200) -> BytesIO:
     """Pie chart: road lighting."""
     data = {}
     if stats.road_lighting_yes > 0:
@@ -88,10 +89,10 @@ def chart_lighting(stats: AreaStatistics) -> BytesIO:
         data["لا توجد إنارة"] = stats.road_lighting_no
 
     colors = [GOLD, "#3B82AA"][:len(data)]
-    return _pie_chart(data, "إنارة الطرق")
+    return _pie_chart(data, "إنارة الطرق", dpi=dpi)
 
 
-def chart_parking(stats: AreaStatistics) -> BytesIO:
+def chart_parking(stats: AreaStatistics, dpi: int = 200) -> BytesIO:
     """Pie chart: parking availability."""
     data = {}
     if stats.parking_yes > 0:
@@ -100,4 +101,21 @@ def chart_parking(stats: AreaStatistics) -> BytesIO:
         data["لا توجد مواقف"] = stats.parking_no
 
     colors = [COLOR_GOOD, COLOR_MODERATE][:len(data)]
-    return _pie_chart(data, "توفر المواقف")
+    return _pie_chart(data, "توفر المواقف", dpi=dpi)
+
+
+def chart_compliance(stats: AreaStatistics, dpi: int = 200) -> BytesIO:
+    """Pie chart: compliance status (compliant / non-compliant / N/A)."""
+    data = {}
+    if stats.compliant_count > 0:
+        data["ممتثل"] = stats.compliant_count
+    if stats.non_compliant_count > 0:
+        data["غير ممتثل"] = stats.non_compliant_count
+    if stats.na_compliance_count > 0:
+        data["غير محدد"] = stats.na_compliance_count
+
+    if not data:
+        data["لا توجد بيانات"] = 1
+
+    colors = [COLOR_GOOD, COLOR_BAD, "#78909C"][:len(data)]
+    return _pie_chart(data, "حالة الامتثال", dpi=dpi)

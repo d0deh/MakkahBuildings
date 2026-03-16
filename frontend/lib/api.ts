@@ -34,6 +34,12 @@ export async function getStats(sessionId: string): Promise<AreaStats> {
   return request(`/sessions/${sessionId}/stats`);
 }
 
+export async function getValidation(
+  sessionId: string
+): Promise<{ warnings: string[] }> {
+  return request(`/sessions/${sessionId}/validation`);
+}
+
 export async function getCharts(sessionId: string): Promise<ChartsResponse> {
   return request(`/sessions/${sessionId}/charts`);
 }
